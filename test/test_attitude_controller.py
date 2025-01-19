@@ -91,4 +91,4 @@ if __name__ == "__main__":
     config = "../config/rocky0704_model_params.yaml"
     test_wrench_to_rotor_forces(config)
     test_force_to_rpm(config)
-    #test_att_ctrl(config, DATA_DIR + "2023-05-28-07-18-08_attitudepd.npz")
+    test_att_ctrl(config, DATA_DIR + "2023-05-28-07-18-08_attitudepd.npz")
