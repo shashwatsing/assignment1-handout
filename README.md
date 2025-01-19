@@ -63,6 +63,9 @@ you will need to implement the following functions:
 * `calculate_angular_acceleration` (5 points)
 * `ode_step` (25 points)
 
+There are local tests provided for the functions described in 1.2 --
+1.6 in `test/test_quadrotor_simulator.py`.
+
 ### 1.1 `construct_mixer` (5 points)
 This function implements the mixer matrix as described in the lecture
 slides. There is no local test for this function. To check your results,
@@ -70,28 +73,17 @@ you will need to upload your function to AutoLab.
 
 ### 1.2 `calculate_force_and_torque_from_rpm` (5 points)
 This function calculates the scalar force and 3x1 torque vector from a
-vector of 4 RPM values using the motor model discussed in class. To
-locally check your results, you can run the
-`test_calculate_force_and_torque_from_rpm` function, which is located
-in `test_quadrotor_simulator.py`.
+vector of 4 RPM values using the motor model discussed in class.
 
 ### 1.3 `quaternion_derivative` (5 points)
 This function calculates the derivative of the quaternion using the
-formula covered in the slides. To locally check your results, you
-can use the `test_quaternion_derivative` function, which is located
-in `test_quadrotor_simulator.py`.
+formula covered in the slides.
 
 ### 1.4 `calculate_world_frame_linear_acceleration` (5 points)
-In this function you will implement Equation (4.2) from [1]. To
-locally check your results, you can use the
-`test_calculate_world_frame_linear_velocity` function, which is
-located in `test_quadrotor_simulator.py`.
+In this function you will implement Equation (4.2) from [1].
 
 ### 1.5 `calculate_angular_acceleration` (5 points)
-In this function you will implement Equation (4.3) from [1]. To
-locally check your results, you can use the
-`test_calculate_angular_acceleration` function, which is located in
-`test_quadrotor_simulator.py`.
+In this function you will implement Equation (4.3) from [1].
 
 ### 1.6 `ode_step` (25 points)
 This function implements the equations of motion for the quadrotor
@@ -124,7 +116,9 @@ You will need to write the following functions:
 * `compute_orientation` (5 points)
 * `compute_command` (15 points)
 
-Detailed instructions for the contents of each function follow:
+Detailed instructions for the contents of each function follow. There
+are local tests provided for each function in
+`test/test_position_controller.py`.
 
 ### 2.1 `compute_body_z_accel` (5 points)
 This function uses the desired acceleration and current rotation to
@@ -171,6 +165,9 @@ You will need to write the following functions:
 * `wrench_to_rotor_forces` (5 points)
 * `force_to_rpm` (5 points)
 * `run_ctrl` (10 points)
+
+There are local tests provided for each function in
+`test/test_attitude_controller.py`.
 
 ### 3.1 `wrench_to_rotor_forces` (5 points)
 Uses the inverse of the mixer matrix to calculate rotor forces from
