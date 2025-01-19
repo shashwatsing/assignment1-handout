@@ -93,9 +93,9 @@ this function.
 
 In this function, you will need to implement the following:
 * convert commanded RPMs (coming from the controller) to desired force and torques (see 1.2)
-* calculate the angular acceleration (see 1.3)
+* calculate the derivative of the quaternion using the lecture notes. (see 1.3)
 * calculate the linear acceleration (see 1.4)
-* calculate the derivative of the quaternion using the lecture notes. (see 1.2)
+* calculate the angular acceleration (see 1.5)
 * calculate the achieved RPMs
 
 To locally test your results, you can use the `test_ode_step`
