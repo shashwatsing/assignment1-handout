@@ -118,7 +118,7 @@ class QuadrotorAttitudeControllerPD:
             rotor_forces: 4x1 numpy matrix representing rotor forces
         """
 
-        # TODO: Assignment 1, Problem 4.1
+        # TODO: Assignment 1, Problem 3.1
 
         rotor_forces = np.zeros((4, 1))
         return rotor_forces
@@ -134,7 +134,7 @@ class QuadrotorAttitudeControllerPD:
             uW: 4x1 numpy matrix representing RPMs
         """
 
-        # TODO: Assignment 1, Problem 4.2
+        # TODO: Assignment 1, Problem 3.2
 
         uW = np.zeros((4, 1))
         return uW
@@ -161,6 +161,6 @@ class QuadrotorAttitudeControllerPD:
             sat_rpms: 4x1 numpy matrix representing saturated RPMs
         """
 
-        # TODO: Assignment 1, Problem 4.3
+        # TODO: Assignment 1, Problem 3.3
 
         return np.zeros((4, 1))

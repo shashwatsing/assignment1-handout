@@ -7,8 +7,10 @@ controller to track simple trajectories.
 ### Academic Integrity
 1. Do not publicly share your solution (using GitHub or otherwise)
 2. Collaboration is encouraged but you should write final code on your own.
+3. No AI tools may be used to complete this assignment. This includes
+but is not limited to Copilot, ChatGPT, Perplexity AI, and Cursor AI.
 
-### 0.0 Setup
+## 0. Setup
 Create a python virtual environment.
 ```python
 python3.8 -m venv .venv
@@ -40,61 +42,12 @@ this data using the download script in the `data` directory.
 python download.py
 ```
 
-## 1.0 Rotations (20 points)
-The directory containing rotation representations is in `rotation3.py`.
-In this part of the assignment you will write the code to perform
-the following conversions:
+**IMPORTANT:** Please copy your solutions from assignment0 (i.e., the
+`utils` directory) into the `quadrotor_simulator_py` directory. The
+functions you write in this assignment depend on completion of the
+previous assignment.
 
-* Rotation matrix (3x3) -> Euler ZYX angles: `to_euler_zyx`
-* Euler ZYX -> Rotation matrix (3x3): `from_euler_zyx`
-* Rotation matrix (3x3) -> Quaternion (w,x,y,z): `to_quat`
-* Quaternion (w,x,y,z) -> Rotation matrix (3x3): `from_quat`
-
-All functions are contained within the rotation3.py file.
-More information about each function follows.
-Your code will be graded using Autolab. See Section 5 for
-details about uploading and receiving scores for your
-implementations.
-
-### 1.1 `to_euler_zyx`
-This function calculates the angles `phi=X`, `theta=Y`, `psi=Z` that
-represent the rotation in the Z-Y-X Tait-Bryant
-parameterization. The expected output is a 1x3 numpy array.  Note: the
-expected output is in reverse order from functions like MATLAB's
-`rotm2eul`; however, you can use this function to check your results.
-
-### 1.2 `from_euler_zyx`
-This function calculates the 3x3 rotation matrix from the input angles
-`phi=X`, `theta=Y`, and `psi=Z`.
-
-### 1.3 `roll`
-This function extracts and returns the phi component from the
-rotation matrix.
-
-### 1.4 `pitch`
-This function extracts and returns the theta component from the
-rotation matrix.
-
-### 1.5 `yaw`
-This function extracts and returns the psi component from the
-rotation matrix.
-
-### 1.6 `from_quat`
-This function calculates the 3x3 rotation matrix from a
-(w,x,y,z)-parameterized quaternion.
-
-### 1.7 `to_quat`
-This function calculates the (w,x,y,z) quaternion from a 3x3 rotation
-matrix.
-
-## Checking your results
-There is a test in `test/test_orientation.py`. It will print out
-```python
-Tests Passed
-```
-on success and assert an error if it fails.
-
-## 2. Quadrotor Simulator (50 points)
+## 1. Quadrotor Simulator (50 points)
 The quadrotor simulator is contained in `quadrotor_simulator_py`. You
 will implement functions in this folder, zip your folder, and upload
 to Autolab for grading.
@@ -102,39 +55,61 @@ to Autolab for grading.
 Test data and expected solutions are available for local testing.
 
 To receive full credit on this portion of the assignment,
-you will need to implement the following four functions:
+you will need to implement the following functions:
 
 * `construct_mixer` (5 points)
+* `calculate_force_and_torque_from_rpm` (5 points)
+* `calculate_quadrotor_derivative` (5 points)
 * `calculate_world_frame_linear_acceleration` (5 points)
 * `calculate_angular_acceleration` (5 points)
-* `ode_step` (15 points)
+* `ode_step` (25 points)
 
-### 2.1 `construct_mixer`
+### 1.1 `construct_mixer` (5 points)
 This function implements the mixer matrix as described in the lecture
-slides.
+slides. There is no local test for this function. To check your results,
+you will need to upload your function to AutoLab.
 
-### 2.2 `calculate_world_frame_linear_acceleration`
-In this function you will implement Equation (4.2) from [1].
+### 1.2 `calculate_force_and_torque_from_rpm` (5 points)
+This function calculates the scalar force and 3x1 torque vector from a
+vector of 4 RPM values using the motor model discussed in class. To
+locally check your results, you can run the
+`test_calculate_force_and_torque_from_rpm` function, which is located
+in `test_quadrotor_simulator.py`.
 
-### 2.3 `calculate_angular_acceleration`
-In this function you will implement Equation (4.3) from [1].
+### 1.3 `quaternion_derivative` (5 points)
+This function calculates the derivative of the quaternion using the
+formula covered in the slides. To locally check your results, you
+can use the `test_quaternion_derivative` function, which is located
+in `test_quadrotor_simulator.py`.
 
-### 2.4 `ode_step`
+### 1.4 `calculate_world_frame_linear_acceleration` (5 points)
+In this function you will implement Equation (4.2) from [1]. To
+locally check your results, you can use the
+`test_calculate_world_frame_linear_velocity` function, which is
+located in `test_quadrotor_simulator.py`.
+
+### 1.5 `calculate_angular_acceleration` (5 points)
+In this function you will implement Equation (4.3) from [1]. To
+locally check your results, you can use the
+`test_calculate_angular_acceleration` function, which is located in
+`test_quadrotor_simulator.py`.
+
+### 1.6 `ode_step` (25 points)
 This function implements the equations of motion for the quadrotor
 dynamics model. The ODE solver is used to integrate the equations over
-a period of time. The other two functions (1.1) and (1.2) will be
-called in `ode_step`.
+a period of time. The functions (1.1 -- 1.5) will be called within
+this function.
 
 In this function, you will need to implement the following:
-* Convert commanded RPMs (coming from the controller) to desired force and torques
-* calculate the angular acceleration (see 2.3)
-* calculate the linear acceleration (see 2.2)
-* calculate the derivative of the quaternion using the lecture notes.
+* convert commanded RPMs (coming from the controller) to desired force and torques (see 1.2)
+* calculate the angular acceleration (see 1.3)
+* calculate the linear acceleration (see 1.4)
+* calculate the derivative of the quaternion using the lecture notes. (see 1.2)
 * calculate the achieved RPMs
 
-## Checking your results
-There is a test in `/test/test_ode_step.py`. If your results are
-correct, you should see the following output.
+To locally test your results, you can use the `test_ode_step`
+function, which is located in `test_quadrotor_simulator.py`. If your
+results are correct, you should see the following output.
 
 ![](./img/test_ode_step_pos.png)
 ![](./img/test_ode_step_vel.png)
@@ -142,17 +117,17 @@ correct, you should see the following output.
 ![](./img/test_ode_step_angvel.png)
 ![](./img/test_ode_step_angacc.png)
 
-## 3. Position Controller (15 points)
+## 2. Position Controller (30 points)
 You will need to write the following functions:
 
-* `compute_body_z_accel`
-* `compute_hod_refs`
-* `compute_orientation`
-* `compute_command`
+* `compute_body_z_accel` (5 points)
+* `compute_hod_refs` (5 points)
+* `compute_orientation` (5 points)
+* `compute_command` (15 points)
 
 Detailed instructions for the contents of each function follow:
 
-### 3.1 `compute_body_z_accel`
+### 2.1 `compute_body_z_accel` (5 points)
 This function uses the desired acceleration and current rotation to
 calculate the body frame z acceleration.  See page 20 of [1] for
 implementation details.
@@ -160,14 +135,14 @@ implementation details.
 The lecture slides on quadrotor control also discuss how to implement
 this function.
 
-### 3.2 `compute_orientation`
+### 2.2 `compute_orientation` (5 points)
 This function calculates the desired orientation.  Use Equations (33)
 -- (36) from [3] to implement this function.
 
 The lecture slides on quadrotor control also discuss how to implement
 this function in detail.
 
-### 3.3 `compute_hod_refs`
+### 2.3 `compute_hod_refs` (5 points)
 This function uses the desired acceleration vector, flat reference,
 and desired rotation to calculate the desired angular velocities and
 accelerations.  Use Equations (14)--(25) of [2] to calculate the
@@ -178,7 +153,7 @@ zero) to make your life easier.
 The lecture slides on quadrotor control also discuss how to implement
 this function in detail.
 
-### 3.4 `compute_command`
+### 2.4 `compute_command` (15 points)
 This function contains the following functionality:
 1. computes the PD feedback-control terms from the position and
    velocity control errors via Equation (32) of [2]
@@ -191,22 +166,22 @@ This function contains the following functionality:
 ![](./img/test_pos_ctrl_angvel.png)
 ![](./img/test_pos_ctrl_thrust.png)
 
-## 4. Attitude Controller (15 points)
+## 3. Attitude Controller (20 points)
 You will need to write the following functions:
 
-* `wrench_to_rotor_forces`
-* `force_to_rpm`
-* `run_ctrl`
+* `wrench_to_rotor_forces` (5 points)
+* `force_to_rpm` (5 points)
+* `run_ctrl` (10 points)
 
-### 4.1 `wrench_to_rotor_forces`
+### 3.1 `wrench_to_rotor_forces` (5 points)
 Uses the inverse of the mixer matrix to calculate rotor forces from
 the thrust and torques.
 
-### 4.2 `force_to_rpm`
+### 3.2 `force_to_rpm` (5 points)
 Uses the forces to calculates the RPMs using the thrust coefficients
 and the quadratic formula.
 
-### 4.3 `run_ctrl`
+### 3.3 `run_ctrl` (10 points)
 This function contains the following functionality:
 
 1. calculates the rotation error metric (see page 21 of [1])
@@ -219,7 +194,7 @@ This function contains the following functionality:
 
 ![](./img/test_att_ctrl.png)
 
-## 5. Grading with AutoLab
+## 4. Grading with AutoLab
 To have your solutions graded, you will need to tar the `quadrotor_simulator_py`
 folder and upload to autolab.
 

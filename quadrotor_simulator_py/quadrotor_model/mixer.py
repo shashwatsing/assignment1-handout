@@ -42,7 +42,7 @@ class QuadMixer:
             mixer: 4x4 numpy matrix
         """
 
-        # TODO: Assignment 1, Problem 2.1
+        # TODO: Assignment 1, Problem 1.1
 
         self.mixer = np.eye(4)
         return self.mixer

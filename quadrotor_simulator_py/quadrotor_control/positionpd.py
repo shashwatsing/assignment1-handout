@@ -73,7 +73,7 @@ class QuadrotorPositionControllerPD:
             u: scalar value representing body-frame z-acceleration
         """
 
-        # TODO: Assignment 1, Problem 3.1
+        # TODO: Assignment 1, Problem 2.1
 
         return 0
 
@@ -90,7 +90,7 @@ class QuadrotorPositionControllerPD:
             angacc_des: 3x1 numpy array representing desired angular acceleration
         """
 
-        # TODO: Assignment 1, Problem 3.3
+        # TODO: Assignment 1, Problem 2.3
 
         angvel_des = np.zeros((3, 1))
         angacc_des = np.zeros((3, 1))
@@ -107,7 +107,7 @@ class QuadrotorPositionControllerPD:
             R_des: 3x3 numpy matrix representing desired orientation
         """
 
-        # TODO: Assignment 1, Problem 3.2
+        # TODO: Assignment 1, Problem 2.2
 
         R_des = np.eye(3)
         return R_des
@@ -122,7 +122,7 @@ class QuadrotorPositionControllerPD:
                 4. Calculates the desired angular velocities and accelerations.
         """
 
-        # TODO: Assignment 1, Problem 3.4
+        # TODO: Assignment 1, Problem 2.4
         pass
 
     def get_cascaded_command(self):

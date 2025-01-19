@@ -172,6 +172,38 @@ class QuadrotorModel:
     def set_pose(self, Twb):
         self.Twb = Pose(Twb)
 
+    def calculate_force_and_torque_from_rpm(self, rpms):
+        """ Calculates the scalar force and torques from RPM using
+                the motor model within this class object.
+        Args:
+            rpms: These are the RPM values.
+        Output:
+            F: scalar value that represents force
+            M: 3x1 numpy array representing torques
+        """
+
+        # TODO: Assignment 1, Problem 1.2
+
+        F = 0.0
+        M = np.array(np.zeros(3,1))
+        return F, M
+
+    def quaternion_derivative(self, qn, wb):
+        """ Calculates the derivative of the quaternion given
+            an input quaternion (qn) and angular velocities (wb)
+
+        Args:
+            qn: Quaternion object
+            wb: 3x1 numpy array representing body-frame angular velocities
+
+        Output:
+            dq: 4x1 numpy array representing the derivative of the quaternion
+        """
+
+        # TODO: Assignment 1, Problem 1.3
+
+        return np.zeros((4, 1))
+
     def calculate_world_frame_linear_acceleration(self, model, ang_acc, wb, Rwb, u1):
         """ Calculates the linear acceleration of the aerial robot.
                 Hint: Use Equation (4.2) of Daniel Mellinger's PhD thesis
@@ -189,33 +221,38 @@ class QuadrotorModel:
             lin_acc: 3x1 numpy array representing linear acceleration
         """
 
-        # TODO: Assignment 1, Problem 2.2
+        # TODO: Assignment 1, Problem 1.4
 
         return np.zeros((3, 1))
 
-    def calculate_angular_acceleration(self, model, moments, wb, Fdes):
-        """ Calculates the vehicle angular acceleration.
-                Hint: Use Equation (4.3) of Daniel Mellinger's PhD thesis
+    def calculate_world_frame_linear_acceleration(self, model, ang_acc, wb, Rwb, u1):
+        """ Calculates the linear acceleration of the aerial robot.
+                Hint: Use Equation (4.2) of Daniel Mellinger's PhD thesis
                 "Trajectory Generation and Control for Quadrotors"
 
         Args:
             model: These are the self.model_params. This will give you the
                 offset of the center of mass in body frame coordinates (r_{off})
-            moments: 3x1 numpy array representing the moments
+            ang_acc: 3x1 numpy array representing angular acceleration
             wb: 3x1 numpy array representing body-frame angular velocities
-            Fdes: 3x1 numpy array representing [0, 0, F]
+            Rwb: 3x3 numpy matrix representing rotation
+            u1: scalar representing vehicle thrust
 
         Output:
-            ang acc: 3x1 numpy array representing angular acceleration
+            lin_acc: 3x1 numpy array representing linear acceleration
         """
 
-        # TODO: Assignment 1, Problem 2.3
+        # TODO: Assignment 1, Problem 1.5
 
         return np.zeros((3, 1))
+
 
     def ode_step(self, t, x):
         """ Numerically integrates the robot dynamics given an initialize
                 condition.
+
+            Don't forget to set self.model_params.aw and self.model_params.ang_acc
+                inside this function.
 
         Args:
             t: interval over which to integrate [tstart, tstop]
@@ -235,14 +272,13 @@ class QuadrotorModel:
                 xdot[13:17]: derivative of rotor speeds
         """
 
-        # TODO: Assignment 1, Problem 2.4
-
+        # TODO: Assignment 1, Problem 1.6
 
         # Uncomment these lines and replace aw with your calculated
         # linear acceleration. Replace ang_acc with your calculated
         # angular acceleration
-        #self.model_params.aw = aw
-        #self.model_params.ang_acc = ang_acc
+        # self.model_params.aw = aw
+        # self.model_params.ang_acc = ang_acc
 
         xdot = np.zeros((17, 1))
         return xdot.flatten()
