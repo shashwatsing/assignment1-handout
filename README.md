@@ -42,10 +42,9 @@ this data using the download script in the `data` directory.
 python download.py
 ```
 
-**IMPORTANT:** Please copy your solutions from assignment0 (i.e., the
-`utils` directory) into the `quadrotor_simulator_py` directory. The
-functions you write in this assignment depend on completion of the
-previous assignment.
+**IMPORTANT:** Please replace the `utils` directory with your
+solutions from assignment0. The functions you write in this assignment
+depend on completion of the previous assignment.
 
 ## 1. Quadrotor Simulator (50 points)
 The quadrotor simulator is contained in `quadrotor_simulator_py`. You

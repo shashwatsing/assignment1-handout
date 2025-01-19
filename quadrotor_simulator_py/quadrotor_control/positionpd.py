@@ -75,7 +75,23 @@ class QuadrotorPositionControllerPD:
 
         # TODO: Assignment 1, Problem 2.1
 
-        return 0
+        return [0]
+
+    def compute_orientation(self, a_des, yaw_ref):
+        """ Calculates the desired orientation
+
+        Args:
+            a_des: 3x1 numpy array representing the desired acceleration
+            yaw_ref: yaw reference
+
+        Output:
+            R_des: 3x3 numpy matrix representing desired orientation
+        """
+
+        # TODO: Assignment 1, Problem 2.2
+
+        R_des = np.eye(3)
+        return R_des
 
     def compute_hod_refs(self, acc_vec_des, flat_ref, R_des):
         """ Calculates the desired angular velocities and accelerations.
@@ -95,22 +111,6 @@ class QuadrotorPositionControllerPD:
         angvel_des = np.zeros((3, 1))
         angacc_des = np.zeros((3, 1))
         return (angvel_des, angacc_des)
-
-    def compute_orientation(self, a_des, yaw_ref):
-        """ Calculates the desired orientation
-
-        Args:
-            a_des: 3x1 numpy array representing the desired acceleration
-            yaw_ref: yaw reference
-
-        Output:
-            R_des: 3x3 numpy matrix representing desired orientation
-        """
-
-        # TODO: Assignment 1, Problem 2.2
-
-        R_des = np.eye(3)
-        return R_des
 
     def compute_command(self):
         """ This function contains the following functionality:

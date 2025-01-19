@@ -185,7 +185,7 @@ class QuadrotorModel:
         # TODO: Assignment 1, Problem 1.2
 
         F = 0.0
-        M = np.array(np.zeros(3,1))
+        M = np.array(np.zeros((3,1)))
         return F, M
 
     def quaternion_derivative(self, qn, wb):
@@ -225,27 +225,25 @@ class QuadrotorModel:
 
         return np.zeros((3, 1))
 
-    def calculate_world_frame_linear_acceleration(self, model, ang_acc, wb, Rwb, u1):
-        """ Calculates the linear acceleration of the aerial robot.
-                Hint: Use Equation (4.2) of Daniel Mellinger's PhD thesis
+    def calculate_angular_acceleration(self, model, moments, wb, Fdes):
+        """ Calculates the vehicle angular acceleration.
+                Hint: Use Equation (4.3) of Daniel Mellinger's PhD thesis
                 "Trajectory Generation and Control for Quadrotors"
 
         Args:
             model: These are the self.model_params. This will give you the
                 offset of the center of mass in body frame coordinates (r_{off})
-            ang_acc: 3x1 numpy array representing angular acceleration
+            moments: 3x1 numpy array representing the moments
             wb: 3x1 numpy array representing body-frame angular velocities
-            Rwb: 3x3 numpy matrix representing rotation
-            u1: scalar representing vehicle thrust
+            Fdes: 3x1 numpy array representing [0, 0, F]
 
         Output:
-            lin_acc: 3x1 numpy array representing linear acceleration
+            ang acc: 3x1 numpy array representing angular acceleration
         """
 
         # TODO: Assignment 1, Problem 1.5
 
         return np.zeros((3, 1))
-
 
     def ode_step(self, t, x):
         """ Numerically integrates the robot dynamics given an initialize
