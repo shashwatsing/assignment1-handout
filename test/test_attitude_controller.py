@@ -6,7 +6,9 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import sys
 
-sys.path.append('../')
+import os
+qs_path = os.path.dirname(os.path.abspath(__file__))+'/..'
+sys.path.append(qs_path)
 
 from quadrotor_simulator_py.quadrotor_control import State
 from quadrotor_simulator_py.quadrotor_control import CascadedCommand
@@ -87,8 +89,8 @@ def test_att_ctrl(config, npz_filepath):
     plt.show()
 
 if __name__ == "__main__":
-    DATA_DIR = "../data/"
-    config = "../config/rocky0704_model_params.yaml"
+    DATA_DIR = qs_path + "/data/"
+    config = qs_path + "/config/rocky0704_model_params.yaml"
     test_wrench_to_rotor_forces(config)
     test_force_to_rpm(config)
     test_att_ctrl(config, DATA_DIR + "2023-05-28-07-18-08_attitudepd.npz")

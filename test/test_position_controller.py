@@ -6,7 +6,9 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import sys
 
-sys.path.append('../')
+import os
+qs_path = os.path.dirname(os.path.abspath(__file__))+'/..'
+sys.path.append(qs_path)
 
 from quadrotor_simulator_py.quadrotor_control import QuadrotorPositionControllerPD
 from quadrotor_simulator_py.quadrotor_control import State
@@ -150,8 +152,8 @@ def test_pos_ctrl(config, npz_filepath):
     plt.show()
 
 if __name__ == "__main__":
-    DATA_DIR = "../data/"
-    config = "../config/rocky0704_model_params.yaml"
+    DATA_DIR = qs_path + "/data/"
+    config = qs_path + "/config/rocky0704_model_params.yaml"
     test_compute_body_z_accel(config)
     test_compute_orientation(config)
     test_compute_hod_refs(config)
