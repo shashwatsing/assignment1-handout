@@ -44,3 +44,48 @@ class Pose:
     def quaternion(self):
         R = Rot3(self.se3[0:3, 0:3])
         return R.to_quat().data
+
+    def set_rotation(self, R):
+        self.se3[0:3, 0:3] = R
+
+    def compose(self, T):
+        """  Return the composition of self.T * T
+        """
+
+        # TODO: Assignment 1: Problem 1.8
+        t1 = self.translation()
+        R1 = self.get_so3()
+        t2 = T.translation()
+        R2 = T.get_so3()
+
+        new_translation = R1 @ t2 + t1
+        new_rotation = R1 @ R2
+
+        new_quaternion = Rot3(new_rotation).to_quat()
+
+        com_pose = np.concatenate([new_translation, new_quaternion.normalize().data])
+
+        return Pose(com_pose)
+
+    # Take the inverse of a homogeneous transform
+    def inverse(self):
+        """ Return the inverse of the homogeneous
+                transform
+        
+        Output: 
+            Pose: Pose object that represents the inverse
+                  of  the input
+        """
+
+        # TODO: Assignment 1: Problem 1.9
+        inv_se3 = np.eye(4)
+        R_inv = self.get_so3().T  # Transpose of the rotation matrix
+        t_inv = -R_inv @ self.translation()  # Inverse translation
+
+        inv_se3[0:3, 0:3] = R_inv
+        inv_se3[0:3, 3] = t_inv
+
+        inv_quat = Rot3(R_inv).to_quat().normalize().data
+        inv_pose = np.concatenate([t_inv, inv_quat])
+
+        return Pose(inv_pose)

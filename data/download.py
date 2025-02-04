@@ -16,4 +16,3 @@ subprocess.run("mv 2023-05-28-07-18-08_npz/*.npz .", shell=True)
 
 # Remove the downloaded folder after moving its contents
 subprocess.run("rm -rf 2023-05-28-07-18-08_npz", shell=True)
-
