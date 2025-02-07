@@ -52,20 +52,13 @@ class Pose:
         """  Return the composition of self.T * T
         """
 
-        # TODO: Assignment 1: Problem 1.8
-        t1 = self.translation()
-        R1 = self.get_so3()
-        t2 = T.translation()
-        R2 = T.get_so3()
+        # Perform matrix multiplication between the homogeneous transformation matrices
+        result_se3 = np.dot(self.se3, T.se3)
 
-        new_translation = R1 @ t2 + t1
-        new_rotation = R1 @ R2
-
-        new_quaternion = Rot3(new_rotation).to_quat()
-
-        com_pose = np.concatenate([new_translation, new_quaternion.normalize().data])
-
-        return Pose(com_pose)
+        translation = result_se3[0:3, 3]
+        rotation_matrix = result_se3[0:3, 0:3]
+        quaternion = Rot3(rotation_matrix).to_quat().data
+        return Pose(np.concatenate([translation, quaternion]))
 
     # Take the inverse of a homogeneous transform
     def inverse(self):
@@ -77,15 +70,8 @@ class Pose:
                   of  the input
         """
 
-        # TODO: Assignment 1: Problem 1.9
-        inv_se3 = np.eye(4)
-        R_inv = self.get_so3().T  # Transpose of the rotation matrix
-        t_inv = -R_inv @ self.translation()  # Inverse translation
-
-        inv_se3[0:3, 0:3] = R_inv
-        inv_se3[0:3, 3] = t_inv
-
-        inv_quat = Rot3(R_inv).to_quat().normalize().data
-        inv_pose = np.concatenate([t_inv, inv_quat])
-
-        return Pose(inv_pose)
+        inv_se3 = np.linalg.inv(self.se3)        
+        translation_inv = inv_se3[0:3, 3]
+        rotation_matrix_inv = inv_se3[0:3, 0:3]
+        quaternion_inv = Rot3(rotation_matrix_inv).to_quat().data        
+        return Pose(np.concatenate([translation_inv, quaternion_inv]))

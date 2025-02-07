@@ -74,8 +74,10 @@ class QuadrotorPositionControllerPD:
         """
 
         # TODO: Assignment 1, Problem 2.1
+        body_z = R_curr[:, 2]  # Extract third column (z-axis in world frame)
+        u = np.dot(body_z, a_des)
 
-        return [0]
+        return u
 
     def compute_orientation(self, a_des, yaw_ref):
         """ Calculates the desired orientation
@@ -89,8 +91,29 @@ class QuadrotorPositionControllerPD:
         """
 
         # TODO: Assignment 1, Problem 2.2
+        # zb_des = a_des / norm(a_des)  
+        # xc_des = np.array([cos(yaw_ref), sin(yaw_ref), 0])
 
-        R_des = np.eye(3)
+        # yb_des = np.cross(zb_des.flatten(), xc_des)
+        # yb_des /= norm(yb_des)  # Normalize
+
+        # xb_des = np.cross(yb_des, zb_des.flatten())
+        # xb_des /= norm(xb_des)  # Normalize
+
+        # yb_des = np.cross(zb_des.flatten(), xb_des)
+
+        # R_des = np.column_stack((xb_des, yb_des, zb_des.flatten()))
+
+        y_c = np.array([-np.sin(yaw_ref), np.cos(yaw_ref), 0]).reshape(-1, 1)
+        z_b_des = a_des / np.linalg.norm(a_des)
+        
+        x_b_des = np.cross(y_c.flatten(), z_b_des.flatten()).reshape(-1, 1)
+        x_b_des /= np.linalg.norm(x_b_des)
+
+        y_b_des = np.cross(z_b_des.flatten(), x_b_des.flatten()).reshape(-1, 1)
+        R_des = np.column_stack((x_b_des, y_b_des, z_b_des))
+
+        #R_des = np.eye(3)
         return R_des
 
     def compute_hod_refs(self, acc_vec_des, flat_ref, R_des):
@@ -108,9 +131,49 @@ class QuadrotorPositionControllerPD:
 
         # TODO: Assignment 1, Problem 2.3
 
-        angvel_des = np.zeros((3, 1))
-        angacc_des = np.zeros((3, 1))
-        return (angvel_des, angacc_des)
+        # angvel_des = np.zeros((3, 1))
+        # angacc_des = np.zeros((3, 1))
+        # jerk_des = flat_ref.jerk
+        # snap_des = flat_ref.snap
+        
+        # angvel_des = np.dot(R_des.T, jerk_des) / norm(acc_vec_des)
+        # angacc_des = np.dot(R_des.T, snap_des) / norm(acc_vec_des)
+
+        z_des = R_des[:, 2].reshape(-1, 1)
+        y_des = R_des[:, 1].reshape(-1, 1)
+        x_des = R_des[:, 0].reshape(-1, 1)
+        
+        c = np.dot(z_des.T, acc_vec_des)[0, 0]
+
+        w_x = -np.dot(y_des.T, flat_ref.jerk)[0, 0] / c
+        w_y = np.dot(x_des.T, flat_ref.jerk)[0, 0] / c
+
+        x_c = np.array([np.cos(flat_ref.yaw), np.sin(flat_ref.yaw), 0]).reshape(-1, 1)
+        y_c = np.array([-np.sin(flat_ref.yaw), np.cos(flat_ref.yaw), 0]).reshape(-1, 1)
+
+        w_z_numerator = (flat_ref.dyaw * np.dot(x_c.T, x_des)[0, 0] + w_y * np.dot(y_c.T, z_des)[0, 0])
+        w_z_denominator = np.linalg.norm(np.cross(y_c.flatten(), z_des.flatten()).reshape(-1, 1))
+        w_z = w_z_numerator / w_z_denominator
+
+        angvel_des = np.array([[w_x], [w_y], [w_z]])
+
+        c_dot = np.dot(z_des.T, flat_ref.jerk)[0, 0]
+
+        a_x = (-np.dot(y_des.T, flat_ref.snap)[0, 0] - (2 * c_dot * w_x) + (c * w_y * w_z)) / c
+        a_y = (np.dot(x_des.T, flat_ref.snap)[0, 0] - (2 * c_dot * w_y) - (c * w_x * w_z)) / c
+
+        a_z_numerator = (flat_ref.d2yaw * np.dot(x_c.T, x_des)[0, 0]
+                        - (2 * flat_ref.dyaw * w_y * np.dot(x_c.T, z_des)[0, 0])
+                        + (2 * flat_ref.dyaw * w_z * np.dot(x_c.T, y_des)[0, 0])
+                        - (w_x * w_y * np.dot(y_c.T, y_des)[0, 0])
+                        - (w_x * w_z * np.dot(y_c.T, z_des)[0, 0])
+                        + (a_y * np.dot(y_c.T, z_des)[0, 0]))
+        a_z_denominator = np.linalg.norm(np.cross(y_c.flatten(), z_des.flatten()).reshape(-1, 1))
+        a_z = a_z_numerator / a_z_denominator
+
+        angacc_des = np.array([[a_x], [a_y], [a_z]])
+
+        return angvel_des, angacc_des
 
     def compute_command(self):
         """ This function contains the following functionality:
@@ -123,6 +186,14 @@ class QuadrotorPositionControllerPD:
         """
 
         # TODO: Assignment 1, Problem 2.4
+        pos_err = self.current_state.pos - self.state_ref.pos
+        vel_err = self.current_state.vel - self.state_ref.vel
+        
+        accel_des = -np.dot(self._Kx, pos_err) - np.dot(self._Kv, vel_err) + self.state_ref.acc + self.gravity_norm * self.zw
+        self.accel_des = self.compute_body_z_accel(accel_des, self.Rcurr)
+        
+        self.Rdes = self.compute_orientation(accel_des, self.state_ref.yaw)
+        self.angvel_des, self.angacc_des = self.compute_hod_refs(accel_des, self.state_ref, self.Rdes)
         pass
 
     def get_cascaded_command(self):

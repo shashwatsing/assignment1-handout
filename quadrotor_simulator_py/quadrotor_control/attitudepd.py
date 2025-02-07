@@ -119,8 +119,12 @@ class QuadrotorAttitudeControllerPD:
         """
 
         # TODO: Assignment 1, Problem 3.1
+        wrench = np.vstack((thrust, torque))
 
-        rotor_forces = np.zeros((4, 1))
+        #print(self.mixer_inv)
+        rotor_forces = self.mixer_inv @ wrench
+
+        #rotor_forces = np.zeros((4, 1))
         return rotor_forces
 
     def force_to_rpm(self, forces):
@@ -135,8 +139,24 @@ class QuadrotorAttitudeControllerPD:
         """
 
         # TODO: Assignment 1, Problem 3.2
-
         uW = np.zeros((4, 1))
+        for i in range(4):
+            a = self.cT2
+            b = self.cT1
+            c = self.cT0 - forces[i, 0]
+
+            if a != 0:
+                disc = b**2 - 4*a*c  # Discriminant
+                if disc >= 0:
+                    uW[i, 0] = (-b + np.sqrt(disc)) / (2*a) 
+                else:
+                    uW[i, 0] = 0  
+            else:
+                if b != 0:
+                    uW[i, 0] = -c / b
+                else:
+                    uW[i, 0] = 0  
+        #uW = np.zeros((4, 1))
         return uW
 
     def saturate_rpm(self, rpm_in):
@@ -162,5 +182,20 @@ class QuadrotorAttitudeControllerPD:
         """
 
         # TODO: Assignment 1, Problem 3.3
+        R = self.current_state.rot
+        Rdes = self.des_rot
 
-        return np.zeros((4, 1))
+        err_matrix = Rdes.T @ R - R.T @ Rdes
+        e_R = 0.5 * np.array([[err_matrix[2, 1]], [err_matrix[0, 2]], [err_matrix[1, 0]]])
+
+        e_omega = self.current_state.angvel - self.des_angvel
+        
+        torque = self.inertia @ (-self.kR * e_R - self.kOm * e_omega + self.des_angacc)
+
+        rotor_forces = self.wrench_to_rotor_forces(self.thrust_des, torque)
+
+        rpms = self.force_to_rpm(rotor_forces)
+
+        sat_rpms = self.saturate_rpm(rpms)
+
+        return sat_rpms

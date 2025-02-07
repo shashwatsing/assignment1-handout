@@ -33,8 +33,8 @@ class QuadMixer:
         self.ms_angle = data['motor_spread_angle']
 
     def construct_mixer(self):
-
-        """ Calculates the mixer matrix, which converts
+        """ 
+        Calculates the mixer matrix, which converts
                 rotor speeds (e.g., RPMs) to force and torques.
                 Assumes NWU.
 
@@ -42,7 +42,16 @@ class QuadMixer:
             mixer: 4x4 numpy matrix
         """
 
-        # TODO: Assignment 1, Problem 1.1
+        half_spread_rad = self.ms_angle
 
-        self.mixer = np.eye(4)
+        lever_arm_x = self.length * np.cos(half_spread_rad)
+        lever_arm_y = self.length * np.sin(half_spread_rad)
+
+        self.mixer = np.array([
+            [1,       1,       1,       1],
+            [-lever_arm_y,  lever_arm_y,  lever_arm_y, -lever_arm_y],
+            [-lever_arm_x,  lever_arm_x, -lever_arm_x,  lever_arm_x],
+            [-self.mscale, -self.mscale,  self.mscale,  self.mscale]
+        ])
+
         return self.mixer

@@ -182,10 +182,21 @@ class QuadrotorModel:
             M: 3x1 numpy array representing torques
         """
 
-        # TODO: Assignment 1, Problem 1.2
+        rpms = np.reshape(rpms, (4, 1))
 
-        F = 0.0
-        M = np.array(np.zeros((3,1)))
+        rotor_thrusts = (
+            self.model_params.motor_model[0] * np.square(rpms) +
+            self.model_params.motor_model[1] * rpms +
+            self.model_params.motor_model[2]
+        )
+        
+        mixer_matrix = self.model_params.mixer
+
+        forces_torques = mixer_matrix @ rotor_thrusts  
+
+        F = forces_torques[0, 0]
+        M = forces_torques[1:4, :].reshape((3, 1))
+
         return F, M
 
     def quaternion_derivative(self, qn, wb):
@@ -200,9 +211,23 @@ class QuadrotorModel:
             dq: 4x1 numpy array representing the derivative of the quaternion
         """
 
-        # TODO: Assignment 1, Problem 1.3
 
-        return np.zeros((4, 1))
+        qn = np.reshape(qn.data, (4,1))
+        qw, qx, qy, qz = qn
+
+        wb = np.reshape(wb, (3,))
+
+        Omega = np.array([
+            [0,    -wb[0], -wb[1], -wb[2]],
+            [wb[0],  0,     wb[2], -wb[1]],
+            [wb[1], -wb[2],  0,     wb[0]],
+            [wb[2],  wb[1], -wb[0],  0    ]
+        ])
+
+        q = np.array([qw, qx, qy, qz])
+        dq = 0.5 * Omega @ q
+
+        return dq
 
     def calculate_world_frame_linear_acceleration(self, model, ang_acc, wb, Rwb, u1):
         """ Calculates the linear acceleration of the aerial robot.
@@ -222,8 +247,19 @@ class QuadrotorModel:
         """
 
         # TODO: Assignment 1, Problem 1.4
+        r_off = model.cg_offset
+        gravity = np.array([0, 0, -model.gravity_norm]).reshape((3, 1))
+        thrust_dir_body = np.array([0, 0, 1]).reshape((3, 1))
+        thrust_dir_world = Rwb @ thrust_dir_body
+        thrust_acc = (u1 / model.mass) * thrust_dir_world
 
-        return np.zeros((3, 1))
+        alpha_cross_roff = np.cross(ang_acc, r_off, axis=0)
+
+        omega_cross_roff = np.cross(wb, r_off, axis=0)
+        omega_cross_omega_cross_roff = np.cross(wb, omega_cross_roff, axis=0)
+
+        lin_acc = (gravity + thrust_acc -  alpha_cross_roff - omega_cross_omega_cross_roff)
+        return lin_acc
 
     def calculate_angular_acceleration(self, model, moments, wb, Fdes):
         """ Calculates the vehicle angular acceleration.
@@ -242,8 +278,20 @@ class QuadrotorModel:
         """
 
         # TODO: Assignment 1, Problem 1.5
+        I = model.inertia  
+        r_off = model.cg_offset  
 
-        return np.zeros((3, 1))
+        wb = wb.flatten()  
+        Fdes = Fdes.flatten()  
+        r_off = r_off.flatten()  
+
+        I_omega = I @ wb
+        omega_cross_I_omega = np.cross(wb, I_omega)  
+
+        roff_cross_Fdes = np.cross(r_off, Fdes) 
+        ang_acc = np.linalg.inv(I) @ (moments - omega_cross_I_omega.reshape((3, 1)) - roff_cross_Fdes.reshape((3, 1)))
+
+        return ang_acc.reshape((3, 1))
 
     def ode_step(self, t, x):
         """ Numerically integrates the robot dynamics given an initialize
@@ -277,8 +325,37 @@ class QuadrotorModel:
         # angular acceleration
         # self.model_params.aw = aw
         # self.model_params.ang_acc = ang_acc
+        pos = x[0:3]
+        quat = x[3:7]
+        lin_vel = x[7:10].reshape((3, 1))  
+        wb = x[10:13].reshape((3, 1))  
+        rs = x[13:17].reshape((4, 1))  
+
+        pose_array = np.concatenate([pos, quat])
+        current_pose = Pose(pose_array)
+        Rwb = current_pose.get_so3()
+
+        F, M = self.calculate_force_and_torque_from_rpm(rs)
+
+        Fdes = np.array([0, 0, F]).reshape((3, 1))
+
+        self.model_params.ang_acc = self.calculate_angular_acceleration(self.model_params, M, wb, Fdes)
+
+        self.model_params.aw = self.calculate_world_frame_linear_acceleration(self.model_params, self.model_params.ang_acc, wb, Rwb, F)
+
+        dq = self.quaternion_derivative(quat, wb)
+
+        uRPM = self.model_params.uRPM 
+        delta = uRPM.reshape((4,1)) - rs 
+        rpm_dot = delta / self.model_params.kmotor_u
 
         xdot = np.zeros((17, 1))
+        xdot[0:3] = lin_vel  
+        xdot[3:7] = dq.reshape((4, 1)) 
+        xdot[7:10] = self.model_params.aw  
+        xdot[10:13] = self.model_params.ang_acc 
+        xdot[13:17] = rpm_dot
+
         return xdot.flatten()
 
     def _saturate_rpms(self, p, rpm_in):

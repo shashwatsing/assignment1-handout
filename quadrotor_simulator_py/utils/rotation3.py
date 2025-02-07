@@ -1,7 +1,7 @@
 import numpy as np
 
-from numpy import arctan2 #as atan2
-from numpy import arcsin #as asin
+from numpy import arctan2 as atan2
+from numpy import arcsin as asin
 from numpy import cos as cos
 from numpy import sin as sin
 
@@ -27,20 +27,20 @@ class Rotation3:
                 roll == phi, pitch == theta, yaw == psi
         """
 
-        phi = np.arctan2(self.R[2, 1], self.R[2, 2])
-        theta = np.arcsin(-self.R[2, 0])
-        psi = np.arctan2(self.R[1, 0], self.R[0, 0])
-        # TODO: Assignment 1, Problem 1.1
+        theta = 0.
+        phi = 0.
+        psi = 0.
 
-        zyx = np.array([phi, theta, psi])
-        #print(zyx)
+        phi = atan2(self.R[2, 1], self.R[2, 2])
+        theta = -asin(self.R[2, 0])
+        psi = atan2(self.R[1, 0], self.R[0, 0])
 
-        return zyx
-
+        return np.array([phi, theta, psi])
+    
     @classmethod
     def from_euler_zyx(self, zyx):
-        """ Convert euler angle rotation representation to 3x3
-                rotation matrix. The input is represented as 
+        """Convert euler angle rotation representation to 3x3
+                rotation matrix. The input is represented as
                 np.array([roll, pitch, yaw]).
         Arg:
             zyx: 1x3 numpy array containing euler angles
@@ -48,33 +48,24 @@ class Rotation3:
         Output:
             Rot: 3x3 rotation matrix (numpy)
         """
+        phi = zyx[0]
+        theta = zyx[1]
+        psi = zyx[2]
 
-        # TODO: Assignment 1, Problem 1.2
-        #print(zyx)
-        phi, theta, psi = zyx
-        #print(psi)
-        Rz = np.array([
-            [cos(psi), -sin(psi), 0],
-            [sin(psi), cos(psi), 0],
-            [0, 0, 1]
-        ])
+        cos_phi = cos(phi)
+        sin_phi = sin(phi)
+        cos_theta = cos(theta)
+        sin_theta = sin(theta)
+        cos_psi = cos(psi)
+        sin_psi = sin(psi)
 
-        Ry = np.array([
-            [cos(theta), 0, sin(theta)],
-            [0, 1, 0],
-            [-sin(theta), 0, cos(theta)]
-        ])
+        R_x = np.array([[1, 0, 0], [0, cos_phi, -sin_phi], [0, sin_phi, cos_phi]])
+        R_y = np.array([[cos_theta, 0, sin_theta], [0, 1, 0], [-sin_theta, 0, cos_theta]])
+        R_z = np.array([[cos_psi, -sin_psi, 0], [sin_psi, cos_psi, 0], [0, 0, 1]])
 
-        Rx = np.array([
-            [1, 0, 0],
-            [0, cos(phi), -sin(phi)],
-            [0, sin(phi), cos(phi)]
-        ]) 
+        R = np.dot(np.dot(R_z, R_y), R_x)
 
-        Rot = Rotation3()
-        #Rot.R = np.eye(3)
-        Rot.R = Rz @ Ry @ Rx
-        return Rot
+        return Rotation3(R=R)
 
     def roll(self):
         """ Extracts the phi component from the rotation matrix
@@ -83,9 +74,9 @@ class Rotation3:
             phi: scalar value representing phi
         """
 
-        # TODO: Assignment 1, Problem 1.3
-
-        return np.arctan2(self.R[2, 1], self.R[2, 2])
+        R = self.R
+        phi = atan2(R[2, 1], R[2, 2])
+        return phi
 
     def pitch(self):
         """ Extracts the theta component from the rotation matrix
@@ -94,9 +85,9 @@ class Rotation3:
             theta: scalar value representing theta
         """
 
-        # TODO: Assignment 1, Problem 1.4
+        theta = -asin(self.R[2, 0])
 
-        return np.arcsin(-self.R[2, 0])
+        return theta
 
     def yaw(self):
         """ Extracts the psi component from the rotation matrix
@@ -105,9 +96,9 @@ class Rotation3:
             theta: scalar value representing psi
         """
 
-        # TODO: Assignment 1, Problem 1.5
+        psi = atan2(self.R[1, 0], self.R[0, 0])
 
-        return np.arctan2(self.R[1, 0], self.R[0, 0])
+        return psi
 
     @classmethod
     def from_quat(self, q):
@@ -118,16 +109,16 @@ class Rotation3:
             Rot: 3x3 rotation matrix represented as numpy matrix
         """
 
-        # TODO: Assignment 1, Problem 1.6
-        w,x,y,z = q.w(), q.x(), q.y(), q.z()
-       
-        R = np.array([
-            [1 - 2*(y**2 + z**2), 2*(x*y - z*w), 2*(x*z + y*w)],
-            [2*(x*y + z*w), 1 - 2*(x**2 + z**2), 2*(y*z - x*w)],
-            [2*(x*z - y*w), 2*(y*z + x*w), 1 - 2*(x**2 + y**2)]
-        ])
-        Rot = Rotation3(R)
-        #Rot.R = np.eye(3)
+        w = q.w()
+        x = q.x()
+        y = q.y()
+        z = q.z()
+
+        Rot = Rotation3()
+        Rot.R = np.array([[1 - 2 * (y**2 + z**2), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                          [2 * (x * y + z * w), 1 - 2 * (x**2 + z**2), 2 * (y * z - x * w)],
+                          [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x**2 + y**2)]])
+
         return Rot
 
     def to_quat(self):
@@ -138,36 +129,9 @@ class Rotation3:
             q: An instance of the Quaternion class parameterized
                 as [w, x, y, z]
         """
-        #reference: Craig, J. J.: "Introduction to Robotics: Mechanics and Control," Pearson.
 
-        # TODO: Assignment 1, Problem 1.7
-
-        R = self.R
-        trace = np.trace(R)
-
-        if trace > 0:
-            S = 2.0 * np.sqrt(trace + 1.0)
-            w = 0.25 * S
-            x = (R[2, 1] - R[1, 2]) / S
-            y = (R[0, 2] - R[2, 0]) / S
-            z = (R[1, 0] - R[0, 1]) / S
-        elif (R[0, 0] > R[1, 1]) and (R[0, 0] > R[2, 2]):
-            S = 2.0 * np.sqrt(1.0 + R[0, 0] - R[1, 1] - R[2, 2])
-            w = (R[2, 1] - R[1, 2]) / S
-            x = 0.25 * S
-            y = (R[0, 1] + R[1, 0]) / S
-            z = (R[0, 2] + R[2, 0]) / S
-        elif R[1, 1] > R[2, 2]:
-            S = 2.0 * np.sqrt(1.0 + R[1, 1] - R[0, 0] - R[2, 2])
-            w = (R[0, 2] - R[2, 0]) / S
-            x = (R[0, 1] + R[1, 0]) / S
-            y = 0.25 * S
-            z = (R[1, 2] + R[2, 1]) / S
-        else:
-            S = 2.0 * np.sqrt(1.0 + R[2, 2] - R[0, 0] - R[1, 1])
-            w = (R[1, 0] - R[0, 1]) / S
-            x = (R[0, 2] + R[2, 0]) / S
-            y = (R[1, 2] + R[2, 1]) / S
-            z = 0.25 * S
-
+        w = 0.5 * np.sqrt(1 + self.R[0, 0] + self.R[1, 1] + self.R[2, 2])
+        x = (self.R[2, 1] - self.R[1, 2]) / (4 * w)
+        y = (self.R[0, 2] - self.R[2, 0]) / (4 * w)
+        z = (self.R[1, 0] - self.R[0, 1]) / (4 * w)
         return Quaternion([w, x, y, z])

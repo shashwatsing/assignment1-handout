@@ -29,10 +29,8 @@ def set_robot_transforms():
 
     # This transform represents the body in in world frame coordinates
     Twb = Pose(np.append(twb, Rwb.to_quat().data))
-    #print(Twb)
 
     # TODO: Assignment 1: Problem 1.10
-    Twc = Twb.compose(Tbc)
-    #print(Twc)
-    return Twc
+    Tcw = Twb.compose(Tbc)    
+    return Tcw
 
